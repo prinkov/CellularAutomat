@@ -97,8 +97,11 @@ public class Main extends Application{
             VBox vbox = new VBox();
             vbox.setSpacing(5);
             field.setPrefSize(600, 600);
-            Scene scene = new Scene(vbox);
-            vbox.setPrefSize(WIDTH, HEIGHT);
+            ScrollPane mainPane = new ScrollPane();
+            mainPane.setContent(vbox);
+            mainPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+            Scene scene = new Scene(mainPane);
+            vbox.setPrefSize(WIDTH + 30, HEIGHT);
             Button nextBtn = new Button("Далее");
             nextBtn.setOnMouseClicked(e -> {
                 nextIteration();
@@ -132,7 +135,7 @@ public class Main extends Application{
                     java.awt.Color.BLACK, java.awt.Color.WHITE), null);
             ScrollPane sc = new ScrollPane();
             sc.setContent(new ImageView(timg));
-            sc.setPrefSize(600, 150);
+            sc.setPrefSize(600, 70);
             vbox.getChildren().addAll(sc,  field, nextBtn);
 
             stage.setScene(scene);
