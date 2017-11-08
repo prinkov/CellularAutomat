@@ -45,7 +45,7 @@ public class Main extends Application{
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
+        grid.setPadding(new Insets(20, 50, 10, 10));
 
         TextField templateField = new TextField();
         templateField.setPromptText("i, j");
@@ -53,6 +53,7 @@ public class Main extends Application{
                 " 1, 0, 0, 0,  0, 1, 1, 1, 1, 1, 0, 0, 1, " +
                 "1, 0, 0, 0, 0, 0, 1, 1, 1");
         TextField nuField = new TextField();
+        nuField.setMinWidth(600);
         nuField.setText("7,5; 0,2; 2,8; 1,0; 1,2; 3,2; 3,4; 4,1; 3,3; 2,6");
         nuField.setPromptText("i, j; k, v");
 
