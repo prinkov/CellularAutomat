@@ -1,13 +1,12 @@
 package xyz.prinkov.mmlab3;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -15,6 +14,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 import org.scilab.forge.jlatexmath.TeXConstants;
 import org.scilab.forge.jlatexmath.TeXFormula;
 
@@ -34,32 +34,62 @@ public class Main extends Application{
         launch(args);
     }
     public void start(Stage stage) throws Exception {
-        TextInputDialog dialog = new TextInputDialog
-                ("0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, " +
-                        "0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, " +
-                        "0, 0, 1, 1, 1");
-        dialog.setTitle("Введите значения");
-        dialog.setHeaderText("Введите шаблон соседства");
-        dialog.setContentText("f:");
+        Dialog<Pair<String, String>> dialog = new Dialog<>();
+        dialog.setTitle("Ввод исходных данных");
+        dialog.setHeaderText("Введите шаблон соседства и начальное состояние");
 
-        Optional<String> result = dialog.showAndWait();
+
+        ButtonType startBtn = new ButtonType("Поехали!", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(startBtn, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        TextField templateField = new TextField();
+        templateField.setPromptText("i, j");
+        templateField.setText("0, 1, 1, 0, 0, 0, 1, 1, 1, 1," +
+                " 1, 0, 0, 0,  0, 1, 1, 1, 1, 1, 0, 0, 1, " +
+                "1, 0, 0, 0, 0, 0, 1, 1, 1");
+        TextField nuField = new TextField();
+        nuField.setText("7,5; 0,2; 2,8; 1,0; 1,2; 3,2; 3,4; 4,1; 3,3; 2,6");
+        nuField.setPromptText("i, j; k, v");
+
+        grid.add(new Label("Шаблон соседства:"), 0, 0);
+        grid.add(templateField, 1, 0);
+        grid.add(new Label("Начальное состояние:"), 0, 1);
+        grid.add(nuField, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        Platform.runLater(() -> templateField.requestFocus());
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == startBtn) {
+                return new Pair<>(templateField.getText(), nuField.getText());
+            }
+            return null;
+        });
+
+        Optional<Pair<String, String>> result = dialog.showAndWait();
         if (result.isPresent()){
-            String res = result.get();
-            res = res.replaceAll(" ", "");
-            int[] template = Arrays.asList(res.split(",")).
+            Pair<String, String> res = result.get();
+            String t1 = res.getKey().replaceAll(" ", "");
+            int[] template = Arrays.asList(t1.split(",")).
                     stream().
                     mapToInt(Integer::parseInt).
                     toArray();
+
+            String t2 = res.getValue().replaceAll(" ", "");
+            String[] nu = t2.split(";");
             //-----------NU--------------
-            table.table[7][5] = 1;
-            table.table[0][2] = 1;
-            table.table[2][8] = 1;
-            table.table[1][0] = 1;
-            table.table[1][2] = 1;
-            table.table[3][2] = 1;
-            table.table[3][4] = 1;
-            table.table[4][1] = 1;
-            table.table[3][3] = 1;
+            for(int k = 0; k < nu.length; k++) {
+                nu[k] = nu[k].replaceAll(" ", "");
+                int x = Integer.parseInt(nu[k].split(",")[0]);
+                int y = Integer.parseInt(nu[k].split(",")[1]);
+                table.table[x][y] = 1;
+            }
 
             //-------------
 
@@ -93,10 +123,7 @@ public class Main extends Application{
 
             vbox.setAlignment(Pos.CENTER);
             String polynom = table.computePolynom(template);
-//        String polynom = table.computePolynom(
-//                new int[]{0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
-//                        0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-//                        1, 1, 1});
+
             Label lblP = new Label(polynom);
             lblP.setWrapText(true);
             TeXFormula formula = new TeXFormula(polynom);
